@@ -95,7 +95,7 @@ def decay_constant(half_life:int|float, units:str, conversion: int|float = 1) ->
 
     return constant
 
-def decay(constant:int|float, atoms:int|float, dps: int|float = None) -> int|float:
+def decay(constant:int|float = None, atoms:int|float = None, dps: int|float = None) -> int|float:
     """_summary_
     determine the decay for the amount of the isotope. 
 
@@ -106,12 +106,18 @@ def decay(constant:int|float, atoms:int|float, dps: int|float = None) -> int|flo
     Returns:
         int|float: returns the decay of a isotope in the units of CURIE
     """
+    #check if variables are None or int.
+    if (constant is not None and not isinstance(constant, (int, float))) or (atoms is not None and not isinstance(atoms, (int, float))) or (dps is not None and not isinstance(dps, (int, float))):
+        raise ValueError('Entered Value is incorrect. Input number or no value')
+
     #Depending on what variables are feed into this function, the function will still calculate the decay in Ci's
-    if not dps:
+    if dps is None and atoms is not None and constant is not None:
         dps: int|float = constant*atoms
         decay_curie: int|float = dps/CURIE
-    else:
+    if dps is not None:
         decay_curie: int|float = dps/CURIE
+    else:
+        raise ValueError('Not enough arguments to calculate decay.')
 
     return decay_curie
     
