@@ -38,7 +38,7 @@ def calc_atoms(gram: int | float, isotope_weight: int | float) -> float:
     
     return atoms
 
-def decay_constant(half_life:int|float, units:str, conversion: int|float = None) -> float:
+def decay_constant(half_life:int|float, units:str, conversion: int|float = 1) -> float:
     """_summary_
     This function determines converts the half life of a isotope into seconds. Then using
     The half life equasion, determines the isotopes constant for decay.
@@ -46,24 +46,25 @@ def decay_constant(half_life:int|float, units:str, conversion: int|float = None)
     Args:
         half_life (int | float): The time it takes for half of the amount of a isotope to decay. Also known as half life
         units (str): The units the half life is in
+        conversion (int | float): The direct conversion factor for 
 
     Returns:
         float: returns the decay constant for that element (1/s)
     """
     #Check the values that are inputed into the function.
     if not isinstance(half_life, (int, float)) or not isinstance(units, str) or \
-       (conversion is not None and not isinstance(conversion, (int, float))):
+        (conversion is not None and not isinstance(conversion, (int, float))):
         raise ValueError("Invalid input types: 'half_life' should be int or float, 'units' should be str, "
-                         "and 'conversion' should be int or float if provided.")
+                        "and 'conversion' should be int or float if provided.")
     
     #Determine the units the half life of the isotope is in. Then determine the conversion factor to convert to seconds
     match units:
         case 'Yr':
-            conversion = 365*24*60*60
+            conversion:int = 365*24*60*60
         case 'Day':
-            conversion = 24*60*60
+            conversion:int = 24*60*60
         case 'Hr':
-            conversion = 60*60
+            conversion:int = 60*60
         case 'min': 
             conversion = 60
         case 'sec': 
@@ -73,15 +74,15 @@ def decay_constant(half_life:int|float, units:str, conversion: int|float = None)
         case 'micros':
             conversion = 1/1000000
         case 'ns':
-             conversion = 1/1000000000
+            conversion = 1/1000000000
         case 'ps':
-             conversion = 1/1000000000000
+            conversion = 1/1000000000000
         case 'fs':
-             conversion = 1/1000000000000000
+            conversion = 1/1000000000000000
         case 'as':
-             conversion = 1/1000000000000000000
+            conversion = 1/1000000000000000000
         case 'zs':
-             conversion = 1/1000000000000000000000
+            conversion = 1/1000000000000000000000
         case _:
             if not conversion:
                 raise ValueError('There is no unit type or conversion number for time')
@@ -90,23 +91,28 @@ def decay_constant(half_life:int|float, units:str, conversion: int|float = None)
     time_hl = half_life * conversion
 
     #Calculate the isotope constant
-    constant = math.log(2) / time_hl
+    constant:float = math.log(2) / time_hl
 
     return constant
 
-def decay(constant:int|float, atoms:int|float) -> int|float:
+def decay(constant:int|float, atoms:int|float, dps: int|float = None) -> int|float:
     """_summary_
     determine the decay for the amount of the isotope. 
 
     Args:
         constant (int | float): the decay constant for the isotope
         atoms (int | float): the number of items at the time of decay
-
+        dps (int | float): 
     Returns:
         int|float: returns the decay of a isotope in the units of CURIE
     """
-    dps: int|float = constant*atoms
-    decay_curie: int|float = dps/CURIE
+    #Depending on what variables are feed into this function, the function will still calculate the decay in Ci's
+    if not dps:
+        dps: int|float = constant*atoms
+        decay_curie: int|float = dps/CURIE
+    else:
+        decay_curie: int|float = dps/CURIE
+
     return decay_curie
     
 
