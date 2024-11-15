@@ -1,4 +1,3 @@
-import pytest
 import math
 from Module.Equasions import calc_atoms, decay_constant, decay
 
