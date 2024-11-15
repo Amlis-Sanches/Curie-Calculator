@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from Module.Equasions import calc_atoms, decay_constant, decay
 
 
@@ -56,7 +56,3 @@ class ManualCalculation(ttk.Frame):
             # Display error message if calculations fail
             tk.messagebox.showerror("Error", f"An error occurred: {e}")
 
-# Run the application
-if __name__ == "__main__":
-    app = TestApp()
-    app.mainloop()

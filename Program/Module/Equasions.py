@@ -1,7 +1,8 @@
 import math
-from .BasicFunctions import check
+from BasicFunctions import check
 
-# constant variables 
+# Create Global Variables 
+#Why? Because future equations may require these variables
 global CURIE
 global Avogadro #Avogadro constant
 
@@ -16,33 +17,61 @@ Avogadro: int = 6.02214076e23
 #input and output functions.                                                  #
 #-----------------------------------------------------------------------------#
 
-def calc_atoms(gram: int | float, isotope_weight: int | float) -> float:
+def calc_atoms(gram: int | float, isotope_weight: int | float, atoms:int|float = None, mols: int|float = None) -> float|int:
     """_summary_
     A function to calculate the number of atoms with material from its weight in grams.
     Args:
-        gram (int): The amount of material in {grams}
-        isotope_weight (int): The attomic weight of the material {gram/mol}
+        gram (int|float): The amount of material in {grams}
+        isotope_weight (int|float): The attomic weight of the material {gram/mol}
+        atoms (int|float): the number of atoms within a sample
     
     Returns:
-        float: returns the estimated number of atoms within the sample.
+        float|int: returns the estimated number of atoms within the sample.
     """
     
     #check variables that are inputted
     values = {
-        'V1': (gram, int|float),
-        'V2': (isotope_weight, int|float),
+        'gram': (gram, int|float|None),
+        'Isotope Weight': (isotope_weight, int|float|None),
+        'atoms':(atoms, int|float|None),
+        'mols': (mols, int|float|None),
     }
-    if check(values) == False:
+    is_valid, skipped_args = check(values)  # Unpack the tuple
+
+    if not is_valid: # if is_valid is false
         raise ValueError('Values Not Correct format. Needs to be int or float.')
 
+    match skipped_args:
+        case ['atoms']|['atoms','mols']:
+            #Calculate the number of mols of the material from grams
+            if not mols: #if there is no moles, calculate it
+                mols:float = gram/isotope_weight
+            #Calculate the number of atoms from mols and the global variable Avogadro
+            atoms:float = mols*Avogadro
+            return atoms
+        
+        case ['gram']|['gram','mols']:
+            #Calculate the number of mols
+            if not mols: #if there is no moles, calculate it
+                mols:float = gram/isotope_weight
+            #Calculate grams
+            gram = mols * isotope_weight
+            return gram
+        
+        case ['Isotope Weight']|['Isotope Weight','mols']:
+            #Calculate the number of mols
+            if not mols: #if there is no moles, calculate it
+                mols:float = gram/isotope_weight
+            #Calculate the Isotope Weight
+            isotope_weight = mols / gram
+            return isotope_weight
+        
+        case []:
+            pass
 
-    #Calculate the number of mols of the material from grams
-    mols:float = gram/isotope_weight
+        case _:
+            raise ValueError('Error with list returned')
 
-    #Calculate the number of atoms from mols and the global variable Avogadro
-    atoms:float = mols*Avogadro
-    
-    return atoms
 
 def decay_constant(half_life:int|float, units:str, conversion: int|float = 1, constant: int | float = None) -> float:
     """_summary_
@@ -60,12 +89,14 @@ def decay_constant(half_life:int|float, units:str, conversion: int|float = 1, co
     """
     #Check the values that are inputed into the function.
     values = {
-        'V1': (half_life, int|float),
-        'V2': (units, str),
-        'V3': (conversion, int|float),
-        'V4': (constant, int|float),
+        'Half Life': (half_life, int|float|None),
+        'Units': (units, str|None),
+        'Conversion': (conversion, int|float|None),
+        'constant': (constant, int|float|None),
     }
-    if check(values) == False:
+    is_valid, skipped_args = check(values)  # Unpack the tuple
+
+    if not is_valid: # if is_valid is false
         raise ValueError("Invalid input types: 'half_life' should be int or float, 'units' should be str, "
                         "and 'conversion' should be int or float if provided.")
     
@@ -117,7 +148,7 @@ def decay_constant(half_life:int|float, units:str, conversion: int|float = 1, co
     else:
         raise ValueError('Half Life value or decay constant is missing. Provide Value for either.')
 
-def decay(constant:int|float = None, atoms:int|float = None, dps: int|float = None) -> int|float:
+def decay(constant:int|float = None, atoms:int|float = None, dps: int|float = None, decay_curie: int|float = None) -> int|float:
     """_summary_
     determine the decay for the amount of the isotope. 
 
@@ -130,22 +161,34 @@ def decay(constant:int|float = None, atoms:int|float = None, dps: int|float = No
     """
     #check if variables are None or int.
     values = {
-        'V1': (constant, int|float),
-        'V2': (atoms, int|float),
-        'V3': (dps, int|float),
+        'constant': (constant, int | float | None),
+        'atoms': (atoms, int | float | None),
+        'dps': (dps, int | float | None),
+        'decay_curie': (decay_curie, int | float | None),
     }
-    if check(values) == False:
-        raise ValueError()
 
-    #Depending on what variables are feed into this function, the function will still calculate the decay in Ci's
-    if dps is None and atoms is not None and constant is not None:
-        dps: int|float = constant*atoms
-        decay_curie: int|float = dps/CURIE
-    if dps is not None:
-        decay_curie: int|float = dps/CURIE
-    else:
-        raise ValueError('Not enough arguments to calculate decay.')
+    is_valid, skipped_args = check(values)  # Unpack the tuple
 
-    return decay_curie
+    if not is_valid:
+        print('Check Error with activity function')
+        raise ValueError('Value Error!')
+
+    # Handle skipped arguments with match
+    match skipped_args:
+        case ['decay_curie']|['decay_curie','dps']:
+            # Calculate DPS and decay_curie if decay_curie is skipped
+            dps: int | float = constant * atoms
+            decay_curie: int | float = dps / CURIE
+            return decay_curie
+        case['decay_curie','constant','atoms']:
+            decay_curie: int | float = dps / CURIE
+        case []:
+            # No skipped arguments, likely all values are provided
+            pass
+        case _:
+            # Handle unexpected cases
+            raise ValueError(f"Unexpected skipped arguments: {skipped_args}")
+
+    
     
 

@@ -14,8 +14,6 @@ class App(tk.Tk):
 
         #add tabs to the notebook
         notebook.add(ManualCalculation(self), text="Manual Activity Calculation")
-        notebook.add(ManualCalculation(self),text='Data Table')
-        notebook.add(ManualCalculation(self),text='Activity Calculation')
 
 #Run application
 if __name__ == "__main__":
