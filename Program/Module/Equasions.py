@@ -1,5 +1,13 @@
 import math
-from BasicFunctions import check
+
+try:
+    # Try importing as if part of a package
+    from .BasicFunctions import check
+except ImportError:
+    # Fall back to normal import when running as the main script
+    from BasicFunctions import check
+
+
 
 # Create Global Variables 
 #Why? Because future equations may require these variables
