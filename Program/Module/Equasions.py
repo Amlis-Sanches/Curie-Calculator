@@ -104,7 +104,7 @@ def decay_constant(half_life:int|float, units:str, conversion: int|float = 1, co
         'Half Life': (half_life, int|float|None),
         'Units': (units, str|None),
         'Conversion': (conversion, int|float|None),
-        'constant': (constant, int|float|None),
+        'Constant': (constant, int|float|None),
     }
     is_valid, skipped_args = check(values)  # Unpack the tuple
 
@@ -143,22 +143,30 @@ def decay_constant(half_life:int|float, units:str, conversion: int|float = 1, co
                 if not conversion:
                     raise ValueError('There is no unit type or conversion number for time')
     
-    if constant is None:
-        #convert the half life to seconds
-        time_hl: float = half_life * conversion
+    match skipped_args:
+        case ['Constant']|['Constant','Conversion']:
+            #convert the half life to seconds
+            if conversion:
+                time_hl: float = half_life * conversion
 
-        #Calculate the isotope constant
-        constant:float = math.log(2) / time_hl
+            #Calculate the isotope constant
+            constant:float = math.log(2) / time_hl
 
-        return constant
-    
-    elif half_life is None and constant is not None:
-        #If no input of halflife, calculate the half life is there is a constant
-        time_hl: float = math.log(2) / constant
-        return time_hl
-    
-    else:
-        raise ValueError('Half Life value or decay constant is missing. Provide Value for either.')
+            return constant
+        
+        case ['Half Life','Units','Conversion']:
+            #Calculate the half life from constant
+            half_life: int|float = math.log(2) / constant
+
+            return half_life
+
+        case []:
+            pass
+
+        case _:
+            # Handle unexpected cases
+            raise ValueError('Half Life value or decay constant is missing. Provide Value for either.')
+
 
 def decay(constant:int|float = None, atoms:int|float = None, dps: int|float = None, decay_curie: int|float = None) -> int|float:
     """_summary_
