@@ -1,5 +1,13 @@
 import math
-from BasicFunctions import check
+
+try:
+    # Try importing as if part of a package
+    from .BasicFunctions import check
+except ImportError:
+    # Fall back to normal import when running as the main script
+    from BasicFunctions import check
+
+
 
 # Create Global Variables 
 #Why? Because future equations may require these variables
@@ -24,6 +32,7 @@ def calc_atoms(gram: int | float, isotope_weight: int | float, atoms:int|float =
         gram (int|float): The amount of material in {grams}
         isotope_weight (int|float): The attomic weight of the material {gram/mol}
         atoms (int|float): the number of atoms within a sample
+        mols (int|float): will need for efficancy but this program wont return mols
     
     Returns:
         float|int: returns the estimated number of atoms within the sample.
@@ -65,6 +74,9 @@ def calc_atoms(gram: int | float, isotope_weight: int | float, atoms:int|float =
             #Calculate the Isotope Weight
             isotope_weight = mols / gram
             return isotope_weight
+        
+        case ['Isotope Weight','grams','atoms']|['Isotope Weight','grams','atoms','mols']:
+            raise ValueError(f'Critical values missing: {skipped_args}')
         
         case []:
             pass
